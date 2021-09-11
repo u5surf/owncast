@@ -182,7 +182,7 @@ function formatTimestamp(sentAt) {
   text into the `contenteditable` area on a page.
 */
 function convertToMarkup(str = '') {
-  return convertToText(str).replace(/\n/g, '<br>');
+  return convertToText(str).replace(/\n/g, '<p></p>');
 }
 
 function stripTags(str) {

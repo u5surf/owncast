@@ -178,6 +178,11 @@
   display: block;
   /* height: 15rem; */
 }
+.message-text ul li {
+  list-style: disc;
+  list-style-position: outside;
+  margin-left: 1.5rem;
+}
 
 /* MESSAGE TEXT CONTENT */
 /* MESSAGE TEXT CONTENT */

@@ -86,6 +86,28 @@ func IsUserAgentABot(userAgent string) bool {
 	return ua.Bot()
 }
 
+// IsUserAgentAPlayer returns if a web client user-agent is seen as a media player.
+func IsUserAgentAPlayer(userAgent string) bool {
+	if userAgent == "" {
+		return false
+	}
+
+	playerStrings := []string{
+		"mpv",
+		"player",
+		"vlc",
+		"applecoremedia",
+	}
+
+	for _, playerString := range playerStrings {
+		if strings.Contains(strings.ToLower(userAgent), playerString) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func RenderSimpleMarkdown(raw string) string {
 	markdown := goldmark.New(
 		goldmark.WithRendererOptions(
@@ -143,23 +165,28 @@ func RenderPageContentMarkdown(raw string) string {
 
 // GetCacheDurationSecondsForPath will return the number of seconds to cache an item.
 func GetCacheDurationSecondsForPath(filePath string) int {
-	if path.Base(filePath) == "thumbnail.jpg" {
-		// Thumbnails re-generate during live
+	filename := path.Base(filePath)
+	fileExtension := path.Ext(filePath)
+
+	if filename == "thumbnail.jpg" || filename == "preview.gif" {
+		// Thumbnails & preview gif re-generate during live
 		return 20
-	} else if path.Ext(filePath) == ".js" || path.Ext(filePath) == ".css" {
+	} else if fileExtension == ".js" || fileExtension == ".css" {
 		// Cache javascript & CSS
-		return 60
-	} else if path.Ext(filePath) == ".ts" {
+		return 60 * 10
+	} else if fileExtension == ".ts" {
 		// Cache video segments as long as you want. They can't change.
 		// This matters most for local hosting of segments for recordings
 		// and not for live or 3rd party storage.
 		return 31557600
-	} else if path.Ext(filePath) == ".m3u8" {
+	} else if fileExtension == ".m3u8" {
 		return 0
+	} else if fileExtension == ".jpg" || fileExtension == ".png" || fileExtension == ".gif" || fileExtension == ".svg" {
+		return 60 * 60 * 24
 	}
 
 	// Default cache length in seconds
-	return 30
+	return 60 * 10
 }
 
 func IsValidUrl(urlToTest string) bool {

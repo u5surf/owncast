@@ -5,12 +5,8 @@ const html = htm.bind(h);
 import Message from './message.js';
 import ChatInput from './chat-input.js';
 import { CALLBACKS, SOCKET_MESSAGE_TYPES } from '../../utils/websocket.js';
-import {
-  jumpToBottom,
-  debounce,
-  setLocalStorage,
-} from '../../utils/helpers.js';
-import { checkIsModerator, extraUserNamesFromMessageHistory } from '../../utils/chat.js';
+import { jumpToBottom, debounce } from '../../utils/helpers.js';
+import { extraUserNamesFromMessageHistory } from '../../utils/chat.js';
 import {
   URL_CHAT_HISTORY,
   MESSAGE_JUMPTOBOTTOM_BUFFER,
@@ -306,6 +302,7 @@ export default class Chat extends Component {
     const shouldScroll =
       scrollHeight >= clientHeight &&
       fullyScrolled - scrollTop < MESSAGE_JUMPTOBOTTOM_BUFFER;
+
     return shouldScroll;
   }
 
@@ -326,6 +323,7 @@ export default class Chat extends Component {
   // if the messages list grows in number of child message nodes due to new messages received, scroll to bottom.
   messageListCallback(mutations) {
     const numMutations = mutations.length;
+
     if (numMutations) {
       const item = mutations[numMutations - 1];
       if (item.type === 'childList' && item.addedNodes.length) {

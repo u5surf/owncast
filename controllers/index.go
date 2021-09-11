@@ -44,6 +44,11 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if utils.IsUserAgentAPlayer(r.UserAgent()) && isIndexRequest {
+		http.Redirect(w, r, "/hls/stream.m3u8", http.StatusTemporaryRedirect)
+		return
+	}
+
 	// If the ETags match then return a StatusNotModified
 	if responseCode := middleware.ProcessEtags(w, r); responseCode != 0 {
 		w.WriteHeader(responseCode)
@@ -59,13 +64,17 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	if path.Ext(r.URL.Path) == ".m3u8" {
 		middleware.DisableCache(w)
+
+		// Use this as an opportunity to mark this viewer as active.
+		id := utils.GenerateClientIDFromRequest(r)
+		core.SetViewerIdActive(id)
 	}
 
 	// Set a cache control max-age header
 	middleware.SetCachingHeaders(w, r)
 
-	// Opt-out of Google FLoC
-	middleware.DisableFloc(w)
+	// Set our global HTTP headers
+	middleware.SetHeaders(w)
 
 	http.ServeFile(w, r, path.Join(config.WebRoot, r.URL.Path))
 }
@@ -87,7 +96,7 @@ func handleScraperMetadataPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Panicln(err)
 	}
-	imageURL, err := url.Parse(fmt.Sprintf("%s://%s%s", scheme, r.Host, "/logo"))
+	imageURL, err := url.Parse(fmt.Sprintf("%s://%s%s", scheme, r.Host, "/logo/external"))
 	if err != nil {
 		log.Panicln(err)
 	}
